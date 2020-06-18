@@ -14,14 +14,14 @@ module Api
       # GET apps/:id/releases
       def showReleases
         url = App.find(params[:id]).git_url
-        client = Octokit::Client.new(:access_token => "50121a275864009df63bec024e1d7345f5c222a5")
+        client = Octokit::Client.new(:access_token => "143026c1da246b0ff9b957cb00656a8d76eaa964")
         response = client.releases(url)
         render json: response
       end
       # GET /apps/1
       def show
         @app = App.find(params[:id])
-        client = Octokit::Client.new(:access_token => "50121a275864009df63bec024e1d7345f5c222a5")
+        client = Octokit::Client.new(:access_token => "143026c1da246b0ff9b957cb00656a8d76eaa964")
         url = @app.git_url
         response = client.latest_release(url) 
         last = response["published_at"]
@@ -76,7 +76,7 @@ module Api
             @ownerApp.role = 1
             @ownerApp.save
             url = App.find(@app.id).git_url
-            client = Octokit::Client.new(:access_token => "50121a275864009df63bec024e1d7345f5c222a5")
+            client = Octokit::Client.new(:access_token => "143026c1da246b0ff9b957cb00656a8d76eaa964")
             user = client.user
             response = client.latest_release(url)
             @app.last_release = response["published_at"]
