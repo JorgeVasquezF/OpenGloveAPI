@@ -14,14 +14,14 @@ module Api
       # GET apps/:id/releases
       def showReleases
         url = App.find(params[:id]).git_url
-        client = Octokit::Client.new(:access_token => "143026c1da246b0ff9b957cb00656a8d76eaa964")
+        client = Octokit::Client.new(:access_token => "144619b2bd2337e9c4238dc34393a31172ce5948")
         response = client.releases(url)
         render json: response
       end
       # GET /apps/1
       def show
         @app = App.find(params[:id])
-        client = Octokit::Client.new(:access_token => "143026c1da246b0ff9b957cb00656a8d76eaa964")
+        client = Octokit::Client.new(:access_token => "144619b2bd2337e9c4238dc34393a31172ce5948")
         url = @app.git_url
         response = client.latest_release(url) 
         last = response["published_at"]
@@ -68,24 +68,30 @@ module Api
       end
       # POST /apps
       def create
-        @app = App.new(app_params)
-        if @app.save
-            @app.user << User.find(params[:user_id])
-            @user = User.find(params[:user_id])
-            @ownerApp = Check.find_by(app_id: @app.id)
-            @ownerApp.role = 1
-            @ownerApp.save
-            url = App.find(@app.id).git_url
-            client = Octokit::Client.new(:access_token => "143026c1da246b0ff9b957cb00656a8d76eaa964")
-            user = client.user
-            response = client.latest_release(url)
-            @app.last_release = response["published_at"]
-            @app.save
-            email(@user,@app)
-            render json: @app, status: :created
-        else
-          render json: @app.errors, status: :unprocessable_entity
-        end
+        begin  # "try" block
+          url = params[:git_url]
+          client = Octokit::Client.new(:access_token => "144619b2bd2337e9c4238dc34393a31172ce5948")
+          user = client.user
+          response = client.latest_release(url)
+          @app = App.new(app_params)
+          if @app.save
+              @app.user << User.find(params[:user_id])
+              @user = User.find(params[:user_id])
+              @ownerApp = Check.find_by(app_id: @app.id)
+              @ownerApp.role = 1
+              @ownerApp.save
+              @app.last_release = response["published_at"]
+              @app.save
+              email(@user,@app)
+              render json: @app, status: :created
+          else
+            render json: @app.errors, status: :unprocessable_entity
+          end
+        rescue StandardError => e
+            render json: { status: 102 }  
+        ensure # will always get executed
+            puts 'Always gets executed.'
+        end 
       end
       # POST /apps/approve
       def approveApp

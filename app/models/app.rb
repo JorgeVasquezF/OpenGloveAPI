@@ -9,7 +9,7 @@ class App < ApplicationRecord
 	validates :os, presence: true
 	validates :documentation, presence: true
 
-	include PgSearch
+	include PgSearch::Model
     pg_search_scope :search, against: [:name, :description],
     using: {
         tsearch: {
