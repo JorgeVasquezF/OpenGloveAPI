@@ -6,6 +6,7 @@ namespace :api do
     resources :users do
     	resources :apps
     end
+    resources :passwords
     resources :apps
     resources :ratings
     resources :tags 
@@ -23,6 +24,9 @@ namespace :api do
   get '/apps/user/:id', to: 'apps#appsByUser'
   post '/apps/approve/', to: 'apps#approveApp'
   get '/apps/usercheck/:userid/:appid', to: 'apps#userCheck'
+  post 'password/forgot', to: 'passwords#forgot'
+  post 'password/reset', to: 'passwords#reset'
+  get '/:token/confirm_email', to: "users#confirm_email"
   
     end
   end	

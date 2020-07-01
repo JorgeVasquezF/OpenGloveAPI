@@ -4,8 +4,6 @@ module Api
       include ActionController::MimeResponds
       before_action :set_app, only: [:addTag, :show, :update, :destroy]
       skip_before_action :authenticate_user, only: [:index, :showReleases, :show, :filterByTag, :search, :getTagsApp, :appsByUser]
-     
-
       # GET /apps
       def index
         @apps = App.paginate(page: params[:page], per_page: 3).order("created_at DESC").where(:verified => [0,2])
@@ -14,14 +12,14 @@ module Api
       # GET apps/:id/releases
       def showReleases
         url = App.find(params[:id]).git_url
-        client = Octokit::Client.new(:access_token => "a6d4fa86a4ad87a442c9ac3e48ddeca614854340")
+        client = Octokit::Client.new(:access_token => Rails.application.credentials.git)
         response = client.releases(url)
         render json: response
       end
       # GET /apps/1
       def show
         @app = App.find(params[:id])
-        client = Octokit::Client.new(:access_token => "a6d4fa86a4ad87a442c9ac3e48ddeca614854340")
+        client = Octokit::Client.new(:access_token => Rails.application.credentials.git)
         url = @app.git_url
         response = client.latest_release(url) 
         last = response["published_at"]
@@ -70,7 +68,7 @@ module Api
       def create
         begin  # "try" block
           url = params[:git_url]
-          client = Octokit::Client.new(:access_token => "a6d4fa86a4ad87a442c9ac3e48ddeca614854340")
+          client = Octokit::Client.new(:access_token => Rails.application.credentials.git)
           user = client.user
           response = client.latest_release(url)
           @app = App.new(app_params)

@@ -19,9 +19,13 @@ class AuthenticateUserCommand < BaseCommand
 
   def payload
     if password_valid?
-      @result = JwtService.encode(contents)
+      if user.email_confirmed
+        @result = JwtService.encode(contents)
+      else
+        errors.add(:base, ('Cuenta no verificada'))
+      end
     else
-      errors.add(:base, I18n.t('authenticate_user_command.invalid_credentials'))
+      errors.add(:base, ('Email o password incorrectos'))
     end
   end
 
@@ -30,7 +34,6 @@ class AuthenticateUserCommand < BaseCommand
       user_id: user.id,
       email: user.email,
       username: user.username,
-      #admin: user.admin,
       expiration: 24.hours.from_now.to_i
     }
   end
