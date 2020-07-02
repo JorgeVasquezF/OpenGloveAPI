@@ -12,14 +12,14 @@ module Api
       # GET apps/:id/releases
       def showReleases
         url = App.find(params[:id]).git_url
-        client = Octokit::Client.new(:access_token => Rails.application.credentials.git)
+        client = Octokit::Client.new(:access_token => Rails.application.credentials.github)
         response = client.releases(url)
         render json: response
       end
       # GET /apps/1
       def show
         @app = App.find(params[:id])
-        client = Octokit::Client.new(:access_token => Rails.application.credentials.git)
+        client = Octokit::Client.new(:access_token => Rails.application.credentials.github)
         url = @app.git_url
         response = client.latest_release(url) 
         last = response["published_at"]
@@ -68,8 +68,7 @@ module Api
       def create
         begin  # "try" block
           url = params[:git_url]
-          client = Octokit::Client.new(:access_token => Rails.application.credentials.git)
-          user = client.user
+          client = Octokit::Client.new(:access_token => Rails.application.credentials.github)     
           response = client.latest_release(url)
           @app = App.new(app_params)
           if @app.save
@@ -86,6 +85,7 @@ module Api
             render json: @app.errors, status: :unprocessable_entity
           end
         rescue StandardError => e
+            puts e.inspect
             render json: { status: 102 }  
         ensure # will always get executed
             puts 'Always gets executed.'
